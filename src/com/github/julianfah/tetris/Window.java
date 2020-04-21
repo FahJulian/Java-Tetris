@@ -15,10 +15,9 @@ public class Window extends JFrame
 
   /**
    * Constructs a initially visible JFrame
-   * 
    * @param title  The title of the JFrame
-   * @param width  The width of the JFrames {@code contentPane}
-   * @param height The height of the JFrames {@code contentPane}
+   * @param width  The width of the JFrame {@code contentPane}
+   * @param height The height of the JFrame {@code contentPane}
    */
   public Window(String title, int width, int height) 
   {
@@ -38,7 +37,7 @@ public class Window extends JFrame
   @Override
   public void paint(Graphics g) 
   {
-    // Make color painting fancier
+    // Make font painting fancier
     Graphics2D g2d = (Graphics2D) g;
     g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
     super.paint(g2d);

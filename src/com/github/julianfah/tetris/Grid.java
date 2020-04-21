@@ -7,6 +7,7 @@ import javax.swing.JLabel;
 import java.awt.Graphics;
 import java.awt.Color;
 import java.awt.Point;
+import java.awt.Rectangle;
 
 public class Grid extends JLabel 
 {
@@ -15,159 +16,233 @@ public class Grid extends JLabel
   public static final int BLOCKSIZE;
   public static final int ROWS;
   public static final int COLS;
+  private static final Point STARTING_POS;
+  /** The amount of rows the current tile moves down normally */
+  private static final int NORMAL_SPEED;
+  /** The amount of rows the current tile moves down when down arrow button is pressed */
+  private static final int ACCELERATED_SPEED;
 
   private final int width;
   private final int height;
   private final int padding;
-  private ArrayList<Block> currentTile;
+  private final Block[][] blocks;
+  private final CollisionManager collisionManager;
+
+  private boolean accelerated;
+  private Clock movingClock;
+  private int tileRotation;
+  private Point tilePos;
+  private Tile currentTile;
+  private Direction horizontalDir;
 
   static 
   {
     BLOCKSIZE = 25;
     ROWS = 20;
-    COLS = 15;
+    COLS = 16;
+    STARTING_POS = new Point((COLS / 2 - 2) * BLOCKSIZE + Game.GRID_PADDING, Game.GRID_PADDING);
+    NORMAL_SPEED = 1;
+    ACCELERATED_SPEED = 10;
   }
 
+  /**
+   * Constructs a new Tetris Grid
+   * @param width Width of the grid
+   * @param height Height of the grid
+   * @param padding Spacing to the border of the window in all 4 directions
+   */
   public Grid(int width, int height, int padding) 
   {
     this.width = width;
     this.height = height;
     this.padding = padding;
-    this.currentTile = tileToBlockArray(new Point(padding, padding), Tile.CUBE);
+    this.blocks = new Block[ROWS][COLS];
+    this.currentTile = Tile.CUBE;
+    this.tileRotation = 0;
+    this.movingClock = new Clock();
+    this.accelerated = false;
+    this.tilePos = (Point) STARTING_POS.clone();
+    this.collisionManager = new CollisionManager(this);
   }
 
+  public void render()
+  {
+    repaint();
+  }
+
+  public void update()
+  {
+    if (currentTile == null) return;
+
+    // Move down the current tile if enough time has passed from the last time
+    // it has been moved down.
+    int speed = accelerated ? ACCELERATED_SPEED : NORMAL_SPEED;
+    if (movingClock.peekDuration() > (1000 / speed))
+    {
+      if (collisionManager.canTileMoveDown()) tilePos.y += BLOCKSIZE;
+      else spawnNewTile();
+      movingClock.reset();
+    }
+
+
+    // Move Tile horizontally if the right or left arrow button has been pressed.
+    if (horizontalDir != null)
+    {
+      if (collisionManager.canTileMoveHorizontically())
+      {
+        tilePos.x += (horizontalDir == Direction.RIGHT) ? BLOCKSIZE : -BLOCKSIZE;
+        horizontalDir = null;
+      } 
+      else if (collisionManager.hasTileHitBlock())
+        spawnNewTile();
+    }
+  }
+  
   @Override
   protected void paintComponent(Graphics g) 
   {
     // Background
     g.setColor(Color.WHITE);
-    g.fillRect(0, 0, width, height);
-
+    g.fillRect(padding, padding, width, height);
+    
     // Grid lines
     g.setColor(Color.LIGHT_GRAY);
     for (int row = 0; row < ROWS + 1; row++)
-      g.fillRect(0 + padding, row * BLOCKSIZE + padding, width - 2 * padding, 1);
+      g.fillRect(0 + padding, row * BLOCKSIZE + padding, width, 1);
     for (int col = 0; col < COLS + 1; col++)
-      g.fillRect(col * BLOCKSIZE + padding, 0 + padding, 1, height - 2 * padding);
-
+      g.fillRect(col * BLOCKSIZE + padding, 0 + padding, 1, height);
+    
     // Current tile
-    for (Block block: currentTile)
+    if (currentTile != null)
+    for (Block block: getCurrentTileBlocks())
+      block.render(g);
+
+    // Static blocks
+    for (Block block: getBlocks())
       block.render(g);
   }
 
-  /**
-   * Construct a {@code Block} ArrayList representating a Tetris tile from a pattern
-   * in the given file
-   * @param pos Coordinates of the top-left position of the Tile
-   * @param Tile {@code Tile} Instance to create the block array off of
-   */
-  private static ArrayList<Block> tileToBlockArray(Point pos, Tile tile) 
+  private void spawnNewTile()
   {
-    ArrayList<Block> blocks = new ArrayList<Block>(5);
-    for (int row = 0; row < 4; row++)
-      for (int col = 0; col < 4; col++) 
-        if (tile.shape[row][col]) 
-          blocks.add(new Block( new Point(pos.x + col * BLOCKSIZE, pos.y + row * BLOCKSIZE), BLOCKSIZE, tile.color ));
+    for (Block block: getCurrentTileBlocks())
+      blocks[(block.getY() - padding) / BLOCKSIZE][(block.getX() - padding) / BLOCKSIZE] = block;
 
+    // currentTile = ... -> Randomize
+    tilePos = (Point) STARTING_POS.clone();
+    tileRotation = 0;
+    movingClock.reset();
+  }
+
+  public void setHorizonalDir(Direction dir) 
+  {
+    if (dir == Direction.RIGHT || dir == Direction.LEFT) horizontalDir = dir;
+  }
+
+  public void setAccelerated(boolean accelerated) 
+  {
+    this.accelerated = accelerated;
+  }
+
+  public Direction getHorizontalDir()
+  {
+    return horizontalDir;
+  }
+
+  public void rotateTile()
+  {
+    tileRotation++;
+    if (tileRotation == 4) tileRotation = 0;
+  }
+
+  public ArrayList<Block> getCurrentTileBlocks()
+  {
+    return currentTile.toBlockArray(tileRotation, tilePos);
+  }
+
+  @Override
+  public Rectangle getBounds()
+  {
+    return new Rectangle(padding, padding, width, height);
+  }
+
+  public ArrayList<Block> getBlocks() 
+  {
+    ArrayList<Block> blocks = new ArrayList<Block>();
+    for (Block[] row: this.blocks)
+      for (Block block: row)
+        if (block != null) blocks.add(block);
     return blocks;
   }
 }
 
-class Block 
+
+class CollisionManager
 {
-  private Point pos;
-  private final int size;
-  private final Color color;
+  public static final int HIT_WALL;
+  public static final int HIT_BLOCK;
 
-  /**
-   * Construct a new Tetris Block (A single block, not a whole tile)
-   * @param pos Coordinates of the top-left corner
-   * @param size Size of the block
-   * @param color Color of the block
-   */
-  public Block(Point pos, int size, Color color)
+  private Grid grid;
+  private int failReason; 
+
+  static 
   {
-    this.pos = pos;
-    this.size = size;
-    this.color = color;
+    HIT_WALL = 1;
+    HIT_BLOCK = 2;
   }
 
-  public void render(Graphics g) 
+  public CollisionManager(Grid grid)
   {
-    // Draw outline in darker color
-    g.setColor(color.darker());
-    g.fillRect(pos.x, pos.y, size, size);
-    // Draw whole in brigther color
-    g.setColor(color.brighter());
-    g.fillRect(pos.x + 3, pos.y + 3, size - 6, size - 6);
+    this.grid = grid; 
   }
 
-  public void setPos(Point pos) 
-  {
-    this.pos = pos;
+  public boolean canTileMoveHorizontically()
+  { 
+    if (grid.getHorizontalDir() == null) return false;
+
+    int velX = (grid.getHorizontalDir() == Direction.RIGHT) ? Grid.BLOCKSIZE : -Grid.BLOCKSIZE;
+    for (Block movingBlock: grid.getCurrentTileBlocks())
+    {
+      // Check if Tile would collide with any of the grids blocks
+      Rectangle movedBounds = movingBlock.getBounds();
+      movedBounds.translate(velX, 0);
+      for (Block staticBlock: grid.getBlocks())
+        if (movedBounds.intersects(staticBlock.getBounds())) 
+        {
+          failReason = HIT_BLOCK;
+          return false;
+          }
+
+      // Check if Tile would go outside of the grids bounds
+      if ((grid.getHorizontalDir() == Direction.RIGHT && movedBounds.getMaxX() > grid.getBounds().getMaxX()) ||
+        (grid.getHorizontalDir()  == Direction.LEFT && movedBounds.getMinX() < grid.getBounds().getMinX()))
+      {
+        failReason = HIT_WALL;
+        return false;
+      }
+    }
+
+    return true;
   }
 
-  public void setX(int x)
+  public boolean hasTileHitBlock()
   {
-    this.pos.x = x;
+    return failReason == HIT_BLOCK;
   }
 
-  public void setY(int y) 
+  public boolean canTileMoveDown()
   {
-    this.pos.y = y;
-  }
-}
+    for (Block movingBlock: grid.getCurrentTileBlocks())
+    {
+      Rectangle movedBounds = movingBlock.getBounds();
+      movedBounds.translate(0, Grid.BLOCKSIZE);
+      for (Block staticBlock: grid.getBlocks())
+        if (movedBounds.intersects(staticBlock.getBounds()))
+          return false;
+      
+      if (movedBounds.getMaxY() > grid.getBounds().getMaxY())
+        return false;
+    }
 
-enum Tile 
-{
-  CUBE(Color.YELLOW, new Boolean[][] { 
-        { true,  true,  false, false }, 
-        { true,  true,  false, false }, 
-        { false, false, false, false },
-        { false, false, false, false } 
-      }),
-  T(Color.MAGENTA, new Boolean[][] { 
-        { true,  true,  true,  false }, 
-        { false, true,  false, false }, 
-        { false, false, false, false },
-        { false, false, false, false }}),
-  I(Color.CYAN, new Boolean[][] { 
-        { false, true,  false, false }, 
-        { false, true,  false, false }, 
-        { false, true,  false, false },
-        { false, true,  false, false } 
-      }),
-  J(Color.BLUE, new Boolean[][] { 
-        { false, false, true,  false }, 
-        { false, false, true,  false }, 
-        { false, false, true,  false },
-        { false, true,  true,  false }
-      }),
-  L(Color.ORANGE, new Boolean[][] { 
-        { false, true,  false, false }, 
-        { false, true,  false, false }, 
-        { false, true,  false, false },
-        { false, true,  true,  false } 
-      }),
-  S(Color.GREEN, new Boolean[][] { 
-        { false, true,  true,  false }, 
-        { true,  true,  false, false }, 
-        { false, false, false, false },
-        { false, false, false, false }
-      }),
-  Z(Color.RED, new Boolean[][] {
-        { true,  true,  false, false }, 
-        { false, true,  true, false },
-        { false, false, false, false }, 
-        { false, false, false, false } 
-      });
-
-  public final Color color;
-  public final Boolean[][] shape;
-
-  private Tile(Color color, Boolean[][] shape) 
-  {
-    this.shape = shape;
-    this.color = color;
+    return true;
   }
 }
