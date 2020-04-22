@@ -1,7 +1,11 @@
 package com.github.julianfah.tetris;
 
+import com.github.julianfah.tetris.ui.Window;
+import com.github.julianfah.tetris.util.Direction;
+
 import java.awt.event.KeyListener;
 import java.awt.event.KeyEvent;
+import java.awt.BorderLayout;
 
 public class Game implements Runnable 
 {
@@ -10,20 +14,29 @@ public class Game implements Runnable
   private static final String WINDOW_TITLE;
   private static final int CONTENT_WIDTH;
   private static final int CONTENT_HEIGHT;
-  public static final int GRID_PADDING;
+  public static final int PADDING;
+  public static final int GRID_WIDTH;
+  public static final int GRID_HEIGHT;
+  public static final int HUD_WIDTH;
+  public static final int HUD_HEIGHT;
 
   private boolean running;
   private Window window;
   private Grid grid;
+  private HUD hud;
 
   static 
   {
     FPS = 60;
     FRAMETIME = 1000 / FPS;
     WINDOW_TITLE = "Tetris";
-    GRID_PADDING = 50;
-    CONTENT_WIDTH = Grid.BLOCKSIZE * Grid.COLS + 2 * GRID_PADDING + 1;
-    CONTENT_HEIGHT = Grid.BLOCKSIZE * Grid.ROWS + 2 * GRID_PADDING + 1;
+    PADDING = 50;
+    GRID_WIDTH = Grid.BLOCKSIZE * Grid.COLS;
+    GRID_HEIGHT = Grid.BLOCKSIZE * Grid.ROWS;
+    HUD_WIDTH = Grid.BLOCKSIZE * 4;
+    HUD_HEIGHT = Grid.BLOCKSIZE * 4;
+    CONTENT_WIDTH = GRID_WIDTH + HUD_WIDTH + 3 * PADDING + 2;
+    CONTENT_HEIGHT = GRID_HEIGHT + 2 * PADDING + 1;
   }
 
   private Game() 
@@ -44,9 +57,11 @@ public class Game implements Runnable
   private void init() 
   {
     window = new Window(WINDOW_TITLE, CONTENT_WIDTH, CONTENT_HEIGHT);
-    grid = new Grid(CONTENT_WIDTH - 2 * GRID_PADDING, CONTENT_HEIGHT - 2 * GRID_PADDING, GRID_PADDING);
+    grid = new Grid(GRID_WIDTH, GRID_HEIGHT, PADDING);
+    hud = new HUD(HUD_WIDTH, HUD_HEIGHT, PADDING);
 
-    window.add(grid);
+    window.add(grid, BorderLayout.CENTER);
+    window.add(hud, BorderLayout.EAST);
     window.addKeyListener(new KeyListener() {
       @Override
       public void keyPressed(KeyEvent e)
@@ -118,11 +133,14 @@ public class Game implements Runnable
   private void update() 
   {
     grid.update();
+
+    hud.setTile(grid.getNextTile());
   }
 
   private void render()
   {
     grid.render();
+    hud.render();
   }
 
   public static void main(String[] args) 

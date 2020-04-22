@@ -1,4 +1,4 @@
-package com.github.julianfah.tetris;
+package com.github.julianfah.tetris.gameobject;
 
 import java.awt.Color;
 import java.awt.Graphics;

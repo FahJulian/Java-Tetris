@@ -1,4 +1,6 @@
-package com.github.julianfah.tetris;
+package com.github.julianfah.tetris.gameobject;
+
+import com.github.julianfah.tetris.Grid;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -47,7 +49,7 @@ public enum Tile
       { false, false, false, false } },
 
     { { false, true,  false, false },
-      { false, true,  false, false },
+      { false, true,  true,  false },
       { false, true,  false, false },
       { false, false, false, false } },
   }),
@@ -75,31 +77,31 @@ public enum Tile
   J(Color.BLUE, new Boolean[][][] { 
     { { false, false, true,  false }, 
       { false, false, true,  false }, 
-      { false, false, true,  false },
-      { false, true,  true,  false } },
+      { false, true,  true,  false },
+      { false, false, false, false } },
 
     { { true,  false, false, false },
-      { true,  true,  true,  true  },
+      { true,  true,  true,  false },
       { false, false, false, false },
       { false, false, false, false } },
 
     { { false, true,  true,  false },
       { false, true,  false, false },
       { false, true,  false, false },
-      { false, true,  false, false } },
+      { false, false, false, false } },
 
-    { { true,  true,  true,  true  },
-      { false, false, false, true  },
+    { { true,  true,  true,  false },
+      { false, false, true,  false },
       { false, false, false, false },
       { false, false, false, false } },
   }),
   L(new Color(255, 108, 0) /* Orange */, new Boolean[][][] { 
     { { false, true,  false, false }, 
       { false, true,  false, false }, 
-      { false, true,  false, false },
-      { false, true,  true,  false } },
+      { false, true,  true,  false },
+      { false, false, false, false } },
 
-    { { true,  true,  true,  true  },
+    { { true,  true,  true,  false },
       { true,  false, false, false },
       { false, false, false, false },
       { false, false, false, false } },
@@ -107,10 +109,10 @@ public enum Tile
     { { false, true,  true,  false },
       { false, false, true,  false },
       { false, false, true,  false },
-      { false, false, true,  false } },
+      { false, false, false, false } },
 
     { { false, false, false, true  },
-      { true,  true,  true,  true  },
+      { false, true,  true,  true  },
       { false, false, false, false },
       { false, false, false, false } },
   }),

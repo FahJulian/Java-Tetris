@@ -1,4 +1,4 @@
-package com.github.julianfah.tetris;
+package com.github.julianfah.tetris.util;
 
 public class Clock {
   private long start;

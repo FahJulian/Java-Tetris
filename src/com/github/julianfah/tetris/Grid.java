@@ -1,5 +1,10 @@
 package com.github.julianfah.tetris;
 
+import com.github.julianfah.tetris.util.Clock;
+import com.github.julianfah.tetris.util.Direction;
+import com.github.julianfah.tetris.gameobject.Tile;
+import com.github.julianfah.tetris.gameobject.Block;
+
 import java.util.ArrayList;
 
 import javax.swing.JLabel;
@@ -33,6 +38,7 @@ public class Grid extends JLabel
   private int tileRotation;
   private Point tilePos;
   private Tile currentTile;
+  private Tile nextTile;
   private Direction horizontalDir;
 
   static 
@@ -40,7 +46,7 @@ public class Grid extends JLabel
     BLOCKSIZE = 25;
     ROWS = 20;
     COLS = 16;
-    STARTING_POS = new Point((COLS / 2 - 2) * BLOCKSIZE + Game.GRID_PADDING, Game.GRID_PADDING);
+    STARTING_POS = new Point((COLS / 2 - 2) * BLOCKSIZE + Game.PADDING, Game.PADDING);
     NORMAL_SPEED = 1;
     ACCELERATED_SPEED = 15;
   }
@@ -58,6 +64,7 @@ public class Grid extends JLabel
     this.padding = padding;
     this.blocks = new Block[ROWS][COLS];
     this.currentTile = Tile.randomTile();
+    this.nextTile = Tile.randomTile();
     this.tileRotation = 0;
     this.movingClock = new Clock();
     this.accelerated = false;
@@ -101,6 +108,8 @@ public class Grid extends JLabel
   @Override
   protected void paintComponent(Graphics g) 
   {
+    super.paintComponent(g);
+    
     // Background
     g.setColor(Color.WHITE);
     g.fillRect(padding, padding, width, height);
@@ -127,7 +136,8 @@ public class Grid extends JLabel
     for (Block block: getCurrentTileBlocks())
       blocks[(block.getY() - padding) / BLOCKSIZE][(block.getX() - padding) / BLOCKSIZE] = block;
 
-    currentTile = Tile.randomTile();
+    currentTile = nextTile;
+    nextTile = Tile.randomTile();
     tilePos = (Point) STARTING_POS.clone();
     tileRotation = 0;
     movingClock.reset();
@@ -180,6 +190,11 @@ public class Grid extends JLabel
       for (Block block: row)
         if (block != null) blocks.add(block);
     return blocks;
+  }
+
+  public Tile getNextTile()
+  {
+    return nextTile;
   }
 }
 
