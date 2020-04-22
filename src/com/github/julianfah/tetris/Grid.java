@@ -103,13 +103,16 @@ public class Grid extends JLabel
       else if (collisionManager.hasTileHitBlock())
         spawnNewTile();
     }
+
+    for (int row = 0; row < ROWS; row++)
+      if (isRowComplete(row)) eraseRow(row);
   }
   
   @Override
   protected void paintComponent(Graphics g) 
   {
     super.paintComponent(g);
-    
+
     // Background
     g.setColor(Color.WHITE);
     g.fillRect(padding, padding, width, height);
@@ -125,7 +128,7 @@ public class Grid extends JLabel
     if (currentTile != null)
     for (Block block: getCurrentTileBlocks())
       block.render(g);
-
+      
     // Static blocks
     for (Block block: getBlocks())
       block.render(g);
@@ -195,6 +198,30 @@ public class Grid extends JLabel
   public Tile getNextTile()
   {
     return nextTile;
+  }
+
+  private boolean isRowComplete(int row)
+  {
+    for (Block block: blocks[row])
+      if (block == null)
+        return false;
+    return true;
+  }
+
+  private void eraseRow(int row)
+  {
+    // blocks[row] = new Block[COLS];
+
+    // Drop all other rows down
+    while (row > 0)
+    {
+      blocks[row] = blocks[row - 1];
+      row--;
+
+      for (Block block: blocks[row])
+        if (block != null) block.setY(block.getY() + BLOCKSIZE);
+    }
+    blocks[0] = new Block[COLS];
   }
 }
 
