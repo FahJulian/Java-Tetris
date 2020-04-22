@@ -42,7 +42,7 @@ public class Grid extends JLabel
     COLS = 16;
     STARTING_POS = new Point((COLS / 2 - 2) * BLOCKSIZE + Game.GRID_PADDING, Game.GRID_PADDING);
     NORMAL_SPEED = 1;
-    ACCELERATED_SPEED = 10;
+    ACCELERATED_SPEED = 15;
   }
 
   /**
@@ -57,7 +57,7 @@ public class Grid extends JLabel
     this.height = height;
     this.padding = padding;
     this.blocks = new Block[ROWS][COLS];
-    this.currentTile = Tile.CUBE;
+    this.currentTile = Tile.randomTile();
     this.tileRotation = 0;
     this.movingClock = new Clock();
     this.accelerated = false;
@@ -127,7 +127,7 @@ public class Grid extends JLabel
     for (Block block: getCurrentTileBlocks())
       blocks[(block.getY() - padding) / BLOCKSIZE][(block.getX() - padding) / BLOCKSIZE] = block;
 
-    // currentTile = ... -> Randomize
+    currentTile = Tile.randomTile();
     tilePos = (Point) STARTING_POS.clone();
     tileRotation = 0;
     movingClock.reset();
@@ -159,12 +159,20 @@ public class Grid extends JLabel
     return currentTile.toBlockArray(tileRotation, tilePos);
   }
 
+  /**
+   * Get a {@code Rectangle} of the grid in the {@code Window}
+   * @return A {@code Rectangle} of the grid's {@code JPanel}
+   */
   @Override
   public Rectangle getBounds()
   {
     return new Rectangle(padding, padding, width, height);
   }
 
+  /**
+   * Get all the current blocks in the grid
+   * @return {@code ArrayList} of all the current static blocks
+   */
   public ArrayList<Block> getBlocks() 
   {
     ArrayList<Block> blocks = new ArrayList<Block>();
@@ -190,11 +198,18 @@ class CollisionManager
     HIT_BLOCK = 2;
   }
 
+  /**
+   * Constructs a new Collision manager for a tetris grid
+   */
   public CollisionManager(Grid grid)
   {
     this.grid = grid; 
   }
 
+  /**
+   * Check if the grid's current tile can move in it's current horizontal direction
+   * @return Whether or not it can move
+   */
   public boolean canTileMoveHorizontically()
   { 
     if (grid.getHorizontalDir() == null) return false;
@@ -224,11 +239,19 @@ class CollisionManager
     return true;
   }
 
+  /**
+   * Check if the last time the tile has failed to move horizontically it was because it would have hit another block
+   * @return Whether or not the last fail reason was another block
+   */
   public boolean hasTileHitBlock()
   {
     return failReason == HIT_BLOCK;
   }
 
+  /**
+   * Check if the grid's current tile can move down.
+   * @return Whether or not the tile can move down
+   */
   public boolean canTileMoveDown()
   {
     for (Block movingBlock: grid.getCurrentTileBlocks())

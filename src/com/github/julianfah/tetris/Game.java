@@ -1,6 +1,5 @@
 package com.github.julianfah.tetris;
 
-import java.awt.Point;
 import java.awt.event.KeyListener;
 import java.awt.event.KeyEvent;
 
@@ -27,7 +26,7 @@ public class Game implements Runnable
     CONTENT_HEIGHT = Grid.BLOCKSIZE * Grid.ROWS + 2 * GRID_PADDING + 1;
   }
 
-  public Game() 
+  private Game() 
   {
     new Thread(this).start();
   }
@@ -68,6 +67,9 @@ public class Game implements Runnable
           case KeyEvent.VK_DOWN:
             grid.setAccelerated(false);
             break;
+          case KeyEvent.VK_UP:
+            grid.rotateTile();
+            break;
           case KeyEvent.VK_LEFT:
             grid.setHorizonalDir(Direction.LEFT);
             break;
@@ -77,7 +79,8 @@ public class Game implements Runnable
         }
       }
 
-      @Deprecated @Override public void keyTyped(KeyEvent e) {}
+      @Deprecated @Override 
+      public void keyTyped(KeyEvent e) {}
     });
   }
 

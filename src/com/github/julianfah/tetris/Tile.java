@@ -1,80 +1,189 @@
 package com.github.julianfah.tetris;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import java.awt.Color;
 import java.awt.Point;
 
 public enum Tile 
 {
-  CUBE(Color.YELLOW, 
-    new Boolean[][][] { 
-      {{ false, true,  true,  false }, 
-       { false, true,  true,  false }, 
-       { false, false, false, false },
-       { false, false, false, false }},
+  CUBE(Color.YELLOW, new Boolean[][][] { 
+    { { false, true,  true,  false }, 
+      { false, true,  true,  false }, 
+      { false, false, false, false },
+      { false, false, false, false } },
 
-      {{ false, false, false, false },
-       { false, false, true,  true  },
-       { false, false, true,  true  },
-       { false, false, false, false }},
+    { { false, true,  true,  false }, 
+      { false, true,  true,  false }, 
+      { false, false, false, false },
+      { false, false, false, false } },
        
-      {{ false, false, false, false },
-       { false, false, false, false },
-       { false, true,  true,  false },
-       { false, true,  true,  false }},
+    { { false, true,  true,  false }, 
+      { false, true,  true,  false }, 
+      { false, false, false, false },
+      { false, false, false, false } },
  
-      {{ false, false, false, false },
-       { true,  true,  false, false },
-       { true,  true,  false, false },
-       { false, false, false, false }}
+    { { false, true,  true,  false }, 
+      { false, true,  true,  false }, 
+      { false, false, false, false },
+      { false, false, false, false } },
   }),
 
   T(Color.MAGENTA, new Boolean[][][] { 
-    {{ true,  true,  true,  false }, 
-     { false, true,  false, false }, 
-     { false, false, false, false },
-     { false, false, false, false }}
+    { { true,  true,  true,  false }, 
+      { false, true,  false, false }, 
+      { false, false, false, false },
+      { false, false, false, false } },
+
+    { { false, true,  false, false },
+      { true,  true,  false, false },
+      { false, true,  false, false },
+      { false, false, false, false } },
+
+    { { false, true,  false, false },
+      { true,  true,  true,  false },
+      { false, false, false, false },
+      { false, false, false, false } },
+
+    { { false, true,  false, false },
+      { false, true,  false, false },
+      { false, true,  false, false },
+      { false, false, false, false } },
   }),
   I(Color.CYAN, new Boolean[][][] { 
-    {{ false, true,  false, false }, 
-     { false, true,  false, false }, 
-     { false, true,  false, false },
-     { false, true,  false, false }}
+    { { false, true,  false, false }, 
+      { false, true,  false, false }, 
+      { false, true,  false, false },
+      { false, true,  false, false } },
+
+    { { false, false, false, false },
+      { true,  true,  true,  true  },
+      { false, false, false, false },
+      { false, false, false, false } },
+
+    { { false, true,  false, false },
+      { false, true,  false, false },
+      { false, true,  false, false },
+      { false, true,  false, false } },
+
+    { { false, false, false, false },
+      { true,  true,  true,  true  },
+      { false, false, false, false },
+      { false, false, false, false } },
   }),
   J(Color.BLUE, new Boolean[][][] { 
-    {{ false, false, true,  false }, 
-     { false, false, true,  false }, 
-     { false, false, true,  false },
-     { false, true,  true,  false }}
+    { { false, false, true,  false }, 
+      { false, false, true,  false }, 
+      { false, false, true,  false },
+      { false, true,  true,  false } },
+
+    { { true,  false, false, false },
+      { true,  true,  true,  true  },
+      { false, false, false, false },
+      { false, false, false, false } },
+
+    { { false, true,  true,  false },
+      { false, true,  false, false },
+      { false, true,  false, false },
+      { false, true,  false, false } },
+
+    { { true,  true,  true,  true  },
+      { false, false, false, true  },
+      { false, false, false, false },
+      { false, false, false, false } },
   }),
-  L(Color.ORANGE, new Boolean[][][] { 
-    {{ false, true,  false, false }, 
-     { false, true,  false, false }, 
-     { false, true,  false, false },
-     { false, true,  true,  false } }
+  L(new Color(255, 108, 0) /* Orange */, new Boolean[][][] { 
+    { { false, true,  false, false }, 
+      { false, true,  false, false }, 
+      { false, true,  false, false },
+      { false, true,  true,  false } },
+
+    { { true,  true,  true,  true  },
+      { true,  false, false, false },
+      { false, false, false, false },
+      { false, false, false, false } },
+
+    { { false, true,  true,  false },
+      { false, false, true,  false },
+      { false, false, true,  false },
+      { false, false, true,  false } },
+
+    { { false, false, false, true  },
+      { true,  true,  true,  true  },
+      { false, false, false, false },
+      { false, false, false, false } },
   }),
   S(Color.GREEN, new Boolean[][][] { 
-    {{ false, true,  true,  false }, 
-     { true,  true,  false, false }, 
-     { false, false, false, false },
-     { false, false, false, false }}
+    { { false, true,  true,  false }, 
+      { true,  true,  false, false }, 
+      { false, false, false, false },
+      { false, false, false, false } },
+
+    { { false, true,  false, false },
+      { false, true,  true,  false },
+      { false, false, true,  false },
+      { false, false, false, false } },
+
+    { { false, true,  true,  false },
+      { true,  true,  false, false },
+      { false, false, false, false },
+      { false, false, false, false } },
+
+    { { false, true,  false, false },
+      { false, true,  true,  false },
+      { false, false, true,  false },
+      { false, false, false, false } },
+
   }),
   Z(Color.RED, new Boolean[][][] {
-    {{ true,  true,  false, false }, 
-     { false, true,  true, false },
-     { false, false, false, false }, 
-     { false, false, false, false }}
+    { { true,  true,  false, false }, 
+      { false, true,  true, false },
+      { false, false, false, false }, 
+      { false, false, false, false } },
+
+    { { false, false, true,  false },
+      { false, true,  true,  false },
+      { false, true,  false, false },
+      { false, false, false, false } },
+
+    { { true,  true,  false, false }, 
+      { false, true,  true, false },
+      { false, false, false, false }, 
+      { false, false, false, false } },
+
+    { { false, false, true,  false },
+      { false, true,  true,  false },
+      { false, true,  false, false },
+      { false, false, false, false } },
   });
 
+  private static ArrayList<Tile> allTiles;
   public final Color color;
   /** The 2-Dimensional shapes of the tile for every rotation */
-  public final Boolean[][][] shapes;
+  private final Boolean[][][] shapes;
 
   private Tile(Color color, Boolean[][][] shapes) 
   {
     this.shapes = shapes;
     this.color = color;
+    register(this);
+  }
+
+  private static void register(Tile tile)
+  {
+    if (allTiles == null) allTiles = new ArrayList<Tile>();
+    allTiles.add(tile);
+  }
+
+  /**
+   * Selects a random entry from the {@code ArrayList} of registered Tiles
+   * @return A random Tile
+   */
+  public static Tile randomTile()
+  {
+    int index = new Random().nextInt(allTiles.size());
+    return allTiles.get(index);
   }
 
   /**
