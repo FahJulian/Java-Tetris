@@ -54,10 +54,18 @@ public class Game implements Runnable
     start();
   }
 
+  /**
+   * Stops the game. Should be called by game members when the player looses.
+   */
+  public void gameover()
+  {
+    running = false;
+  }
+
   private void init() 
   {
     window = new Window(WINDOW_TITLE, CONTENT_WIDTH, CONTENT_HEIGHT);
-    grid = new Grid(GRID_WIDTH, GRID_HEIGHT, PADDING);
+    grid = new Grid(this, GRID_WIDTH, GRID_HEIGHT, PADDING);
     hud = new HUD(HUD_WIDTH, HUD_HEIGHT, PADDING);
 
     window.add(grid, BorderLayout.CENTER);
@@ -128,6 +136,7 @@ public class Game implements Runnable
         }
       }
     }
+    quit();
   }
 
   private void update() 
@@ -141,6 +150,11 @@ public class Game implements Runnable
   {
     grid.render();
     hud.render();
+  }
+
+  private void quit()
+  {
+    System.exit(1);
   }
 
   public static void main(String[] args) 
