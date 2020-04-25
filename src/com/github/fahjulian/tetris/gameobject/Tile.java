@@ -1,6 +1,6 @@
-package com.github.julianfah.tetris.gameobject;
+package com.github.fahjulian.tetris.gameobject;
 
-import com.github.julianfah.tetris.Grid;
+import com.github.fahjulian.tetris.Grid;
 
 import java.util.ArrayList;
 import java.util.Random;

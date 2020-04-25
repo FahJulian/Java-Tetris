@@ -1,7 +1,7 @@
-package com.github.julianfah.tetris;
+package com.github.fahjulian.tetris;
 
-import com.github.julianfah.tetris.gameobject.Tile;
-import com.github.julianfah.tetris.gameobject.Block;
+import com.github.fahjulian.tetris.gameobject.Tile;
+import com.github.fahjulian.tetris.gameobject.Block;
 
 import javax.swing.JLabel;
 

@@ -1,7 +1,7 @@
-package com.github.julianfah.tetris;
+package com.github.fahjulian.tetris;
 
-import com.github.julianfah.tetris.ui.Window;
-import com.github.julianfah.tetris.util.Direction;
+import com.github.fahjulian.tetris.ui.Window;
+import com.github.fahjulian.tetris.util.Direction;
 
 import java.awt.event.KeyListener;
 import java.awt.event.KeyEvent;

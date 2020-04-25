@@ -1,4 +1,4 @@
-package com.github.julianfah.tetris.ui;
+package com.github.fahjulian.tetris.ui;
 
 import javax.swing.JFrame;
 
