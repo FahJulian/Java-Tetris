@@ -161,10 +161,15 @@ public class Grid extends JLabel
     return horizontalDir;
   }
 
+  public Tile getCurrentTile()
+  {
+    return currentTile;
+  }
+  
   public void rotateTile()
   {
-    tileRotation++;
-    if (tileRotation == 4) tileRotation = 0;
+    if (collisionManager.canTileRotate())
+      tileRotation = tileRotation < 3 ? tileRotation + 1 : 0;
   }
 
   public ArrayList<Block> getCurrentTileBlocks()
@@ -198,6 +203,16 @@ public class Grid extends JLabel
   public Tile getNextTile()
   {
     return nextTile;
+  }
+
+  public int getTileRotation()
+  {
+    return tileRotation;
+  }
+
+  public Point getTilePos()
+  {
+    return tilePos;
   }
 
   private boolean isRowComplete(int row)
@@ -254,7 +269,7 @@ class CollisionManager
    */
   public boolean canTileMoveHorizontically()
   { 
-    if (grid.getHorizontalDir() == null) return false;
+    if (grid.getHorizontalDir() == null || grid.getCurrentTile() == null) return false;
 
     int velX = (grid.getHorizontalDir() == Direction.RIGHT) ? Grid.BLOCKSIZE : -Grid.BLOCKSIZE;
     for (Block movingBlock: grid.getCurrentTileBlocks())
@@ -276,6 +291,31 @@ class CollisionManager
         failReason = HIT_WALL;
         return false;
       }
+    }
+
+    return true;
+  }
+
+  /**
+   * Check if the rotated version of the {@code #grid}'s current tile would exceed grid bounds or collide with another block
+   * @return Whether or not it is allowed for the current tile to rotate
+   */
+  public boolean canTileRotate()
+  {
+    if (grid.getCurrentTile() == null) return false;
+
+    int rotation = grid.getTileRotation() < 3 ? grid.getTileRotation() + 1 : 0;
+    ArrayList<Block> rotatedBlocks = grid.getCurrentTile().toBlockArray(rotation, grid.getTilePos());
+
+    for (Block rotatedBlock: rotatedBlocks)
+    {
+      if (rotatedBlock.getBounds().getMaxX() > grid.getBounds().getMaxX() || 
+          rotatedBlock.getBounds().getMinX() < grid.getBounds().getMinX() ||
+          rotatedBlock.getBounds().getMaxY() > grid.getBounds().getMaxY())
+            return false;
+      for (Block staticBlock: grid.getBlocks())
+        if (rotatedBlock.getPos().equals(staticBlock.getPos()))
+          return false;
     }
 
     return true;
