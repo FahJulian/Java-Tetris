@@ -31,6 +31,7 @@ public class Grid extends JLabel
   private final int height;
   private final int padding;
   private final Block[][] blocks;
+  private final Game game;
   private final CollisionManager collisionManager;
 
   private boolean accelerated;
@@ -57,8 +58,9 @@ public class Grid extends JLabel
    * @param height Height of the grid
    * @param padding Spacing to the border of the window in all 4 directions
    */
-  public Grid(int width, int height, int padding) 
+  public Grid(Game game, int width, int height, int padding) 
   {
+    this.game = game;
     this.width = width;
     this.height = height;
     this.padding = padding;
@@ -79,6 +81,13 @@ public class Grid extends JLabel
 
   public void update()
   {
+    // If after this update the game is lost, let the Game instance know
+    if (collisionManager.hasPlayerLost())
+    {
+      game.gameover();
+      return;
+    }
+
     if (currentTile == null) return;
 
     // Move down the current tile if enough time has passed from the last time
@@ -319,6 +328,19 @@ class CollisionManager
     }
 
     return true;
+  }
+
+  /**
+   * Check if the game is lost by checking for blocks above the grid height
+   * @return Whether or not the game is lost
+   */
+  public boolean hasPlayerLost()
+  {
+    for (Block staticBlock: grid.getBlocks())
+      if (staticBlock.getBounds().getMinY() <= grid.getBounds().getMinY())
+        return true;
+      
+    return false;
   }
 
   /**
