@@ -30,8 +30,13 @@ public class Window extends JFrame
     setDefaultCloseOperation(EXIT_ON_CLOSE);
     setLocationRelativeTo(null);
     setVisible(true);
+  }
 
-    resize();
+  @Override
+  public void setVisible(boolean b)
+  {
+    super.setVisible(b);
+    if (b) resize();
   }
 
   @Override

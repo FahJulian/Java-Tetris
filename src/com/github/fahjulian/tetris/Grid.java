@@ -46,7 +46,7 @@ public class Grid extends JLabel
   {
     BLOCKSIZE = 25;
     ROWS = 20;
-    COLS = 16;
+    COLS = 12;
     STARTING_POS = new Point((COLS / 2 - 2) * BLOCKSIZE + Game.PADDING, Game.PADDING);
     NORMAL_SPEED = 1;
     ACCELERATED_SPEED = 15;
@@ -113,8 +113,14 @@ public class Grid extends JLabel
         spawnNewTile();
     }
 
+    int clearedRows = 0;
     for (int row = 0; row < ROWS; row++)
-      if (isRowComplete(row)) eraseRow(row);
+      if (isRowComplete(row)) 
+      {
+        eraseRow(row);
+        clearedRows++;
+      }
+    game.updateScore(clearedRows);
   }
   
   @Override
