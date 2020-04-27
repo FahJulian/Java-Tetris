@@ -3,6 +3,7 @@ package com.github.fahjulian.tetris;
 import com.github.fahjulian.tetris.ui.Window;
 import com.github.fahjulian.tetris.util.Direction;
 import com.github.fahjulian.tetris.util.Database;
+import com.github.fahjulian.tetris.util.GameState;
 
 import java.awt.event.KeyListener;
 import java.awt.event.KeyEvent;
@@ -18,8 +19,8 @@ public class Game implements Runnable
   public static final int PADDING;
   public static final int GRID_WIDTH;
   public static final int GRID_HEIGHT;
-  public static final int HUD_WIDTH;
-  public static final int HUD_HEIGHT;
+  public static final int HUD_GRID_WIDTH;
+  public static final int HUD_GRID_HEIGHT;
 
   private boolean running;
   private Window window;
@@ -27,7 +28,9 @@ public class Game implements Runnable
   private HUD hud;
   private int highscore;
   private int score;
+  private int gameoverScore;
   private int totalClearedRows;
+  private GameState state;
 
   static 
   {
@@ -37,9 +40,9 @@ public class Game implements Runnable
     PADDING = 50;
     GRID_WIDTH = Grid.BLOCKSIZE * Grid.COLS;
     GRID_HEIGHT = Grid.BLOCKSIZE * Grid.ROWS;
-    HUD_WIDTH = Grid.BLOCKSIZE * 4;
-    HUD_HEIGHT = Grid.BLOCKSIZE * 4 + 0;
-    CONTENT_WIDTH = GRID_WIDTH + HUD_WIDTH + 3 * PADDING + 2;
+    HUD_GRID_WIDTH = Grid.BLOCKSIZE * 4;
+    HUD_GRID_HEIGHT = Grid.BLOCKSIZE * 4;
+    CONTENT_WIDTH = GRID_WIDTH + HUD_GRID_WIDTH + 3 * PADDING + 2;
     CONTENT_HEIGHT = GRID_HEIGHT + 2 * PADDING + 1;
   }
 
@@ -63,7 +66,8 @@ public class Game implements Runnable
    */
   public void gameover()
   {
-    running = false;
+    state = GameState.GAMEOVER;
+    restart();
   }
 
   /**
@@ -103,16 +107,27 @@ public class Game implements Runnable
     return highscore;
   }
 
+  public GameState getState()
+  {
+    return state;
+  }
+
+  public int scoreOnGameover()
+  {
+    return this.gameoverScore;
+  }
+
   private void init() 
   {
     Database.init();
     score = 0;
     highscore = Database.getHighscore();
     totalClearedRows = 0;
+    state = GameState.NEW_GAME;
 
     window = new Window(WINDOW_TITLE, CONTENT_WIDTH, CONTENT_HEIGHT);
     grid = new Grid(this, GRID_WIDTH, GRID_HEIGHT, PADDING);
-    hud = new HUD(this, HUD_WIDTH, HUD_HEIGHT, PADDING);
+    hud = new HUD(this, HUD_GRID_WIDTH, HUD_GRID_HEIGHT, PADDING);
 
     window.add(grid, BorderLayout.CENTER);
     window.add(hud, BorderLayout.EAST);
@@ -145,6 +160,15 @@ public class Game implements Runnable
           case KeyEvent.VK_RIGHT:
             grid.setHorizonalDir(Direction.RIGHT);
             break;
+          case KeyEvent.VK_ENTER:
+            state = GameState.INGAME;
+            break;
+          case KeyEvent.VK_ESCAPE:
+            if (state == GameState.INGAME)
+              state = GameState.PAUSED;
+            else if (state == GameState.PAUSED)
+              state = GameState.INGAME;
+            break;
         }
       }
 
@@ -153,11 +177,13 @@ public class Game implements Runnable
     });
 
     window.setVisible(true);
+    hud.setTile(grid.getNextTile());
   }
 
   private void start() 
   {
     running = true;
+    this.state = GameState.NEW_GAME;
     gameloop();
   }
 
@@ -167,7 +193,8 @@ public class Game implements Runnable
     {
       long start = System.nanoTime();
 
-      update();
+      if (state == GameState.INGAME)
+        update();
       render();
 
       // Cap FPS by extending frametime if neccesary
@@ -185,6 +212,28 @@ public class Game implements Runnable
       }
     }
     quit();
+  }
+
+  private void restart()
+  {
+    try 
+    {
+      Thread.sleep(500);
+    } 
+    catch (InterruptedException e) 
+    {
+      e.printStackTrace();
+    }
+    reset();
+  }
+
+  private void reset()
+  {
+    grid.reset();
+    state = GameState.GAMEOVER;
+    this.gameoverScore = score;
+    this.score = 0;
+    this.totalClearedRows = 0;
   }
 
   private void update() 

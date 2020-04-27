@@ -19,7 +19,7 @@ public class HUD extends JLabel
   private static final int ROWS;
   private static final int COLS;
   private static final Point TILE_POS;
-  private static final Font SCORE_FONT;
+  public static final Font SCORE_FONT;
 
   private final int width;
   private final int height;
@@ -74,8 +74,9 @@ public class HUD extends JLabel
       g.fillRect(col * Grid.BLOCKSIZE + padding, 0 + padding, 1, height);
 
     // Tile
-    for (Block block: tile.toBlockArray(0, TILE_POS))
-      block.render(g);
+    if (tile != null)
+      for (Block block: tile.toBlockArray(0, TILE_POS))
+        block.render(g);
 
     // Score
     String score = String.valueOf(game.getScore());

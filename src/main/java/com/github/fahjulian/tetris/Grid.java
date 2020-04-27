@@ -2,6 +2,7 @@ package com.github.fahjulian.tetris;
 
 import com.github.fahjulian.tetris.util.Clock;
 import com.github.fahjulian.tetris.util.Direction;
+import com.github.fahjulian.tetris.util.GameState;
 import com.github.fahjulian.tetris.gameobject.Tile;
 import com.github.fahjulian.tetris.gameobject.Block;
 
@@ -10,9 +11,12 @@ import java.util.ArrayList;
 import javax.swing.JLabel;
 
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Color;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.AlphaComposite;
+import java.awt.Font;
 
 public class Grid extends JLabel 
 {
@@ -64,14 +68,27 @@ public class Grid extends JLabel
     this.width = width;
     this.height = height;
     this.padding = padding;
-    this.blocks = new Block[ROWS][COLS];
+    this.accelerated = false;
+    this.movingClock = new Clock();
+
     this.currentTile = Tile.randomTile();
     this.nextTile = Tile.randomTile();
     this.tileRotation = 0;
-    this.movingClock = new Clock();
-    this.accelerated = false;
+    this.blocks = new Block[ROWS][COLS];
     this.tilePos = (Point) STARTING_POS.clone();
     this.collisionManager = new CollisionManager(this);
+  }
+
+  public void reset()
+  {
+    for (int row = 0; row < ROWS; row++)
+      for (int col = 0; col < COLS; col++)
+        this.blocks[row][col] = null;
+    this.currentTile = Tile.randomTile();
+    this.nextTile = Tile.randomTile();
+    this.tileRotation = 0;
+    this.tilePos = (Point) STARTING_POS.clone();
+    this.movingClock.reset();
   }
 
   public void render()
@@ -127,7 +144,12 @@ public class Grid extends JLabel
   protected void paintComponent(Graphics g) 
   {
     super.paintComponent(g);
-
+    
+    if (game.getState() != GameState.INGAME)
+    {
+      renderOverlay(g);
+    }
+    
     // Background
     g.setColor(Color.WHITE);
     g.fillRect(padding, padding, width, height);
@@ -159,6 +181,42 @@ public class Grid extends JLabel
     tilePos = (Point) STARTING_POS.clone();
     tileRotation = 0;
     movingClock.reset();
+  }
+
+  private void renderOverlay(Graphics g)
+  {
+    Graphics2D g2d = (Graphics2D) g;
+    g2d.setColor(Color.BLACK);
+    g2d.setComposite(AlphaComposite.SrcOver.derive(0.75f));
+    g2d.fillRect(padding, padding, width, height);
+
+    g2d.setColor(Color.RED);
+    g2d.setFont(HUD.SCORE_FONT);
+    g2d.setComposite(AlphaComposite.SrcOver);
+    String msg1 = null, msg2 = null;
+
+    switch (game.getState())
+    {
+      case PAUSED:
+        msg1 = "PAUSED";
+        msg2 = "Press ESC or ENTER to resume";
+        break;
+      case NEW_GAME:
+        msg1 = "WELCOME TO TETRIS";
+        msg2 = "Press Enter to start";
+        break;
+      case GAMEOVER:
+        msg1 = String.format("GAME OVER! (SCORE: %d)", game.scoreOnGameover());
+        msg2 = "Press Enter to restart";
+        break;
+      default: return;
+    }
+
+    g2d.drawString(msg1, padding + width / 2 - g.getFontMetrics().stringWidth(msg1) / 2, padding + height / 2 - 50);
+    g.setFont(new Font("Arial", 1, 17));
+    g2d.drawString(msg2, padding + width / 2 - g.getFontMetrics().stringWidth(msg2) / 2, padding + height / 2 - 10);
+
+    g2d.setComposite(AlphaComposite.DstAtop.derive(0.95f));
   }
 
   public void setHorizonalDir(Direction dir) 
