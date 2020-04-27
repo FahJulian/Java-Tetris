@@ -2,6 +2,7 @@ package com.github.fahjulian.tetris;
 
 import com.github.fahjulian.tetris.gameobject.Tile;
 import com.github.fahjulian.tetris.gameobject.Block;
+import com.github.fahjulian.tetris.util.FontLoader;
 
 import javax.swing.JLabel;
 
@@ -9,6 +10,7 @@ import java.awt.Graphics;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Point;
+import java.awt.Font;
 
 public class HUD extends JLabel 
 {
@@ -17,16 +19,21 @@ public class HUD extends JLabel
   private static final int ROWS;
   private static final int COLS;
   private static final Point TILE_POS;
+  private static final Font SCORE_FONT;
 
   private final int width;
   private final int height;
   private final int padding;
+  private final Game game;
+
   private Tile tile;
 
-  static{
+  static
+  {
     ROWS = 4;
     COLS = 4;
     TILE_POS = new Point(Game.PADDING, Game.PADDING);
+    SCORE_FONT = FontLoader.loadTTF("./rsc/fonts/PlaymegamesReguler-2OOee.ttf", Font.PLAIN, 25);
   }
 
   /**
@@ -35,11 +42,13 @@ public class HUD extends JLabel
    * @param height Height of the HUD
    * @param padding Spacing to other elements in all 4 directions
    */
-  public HUD(int width, int height, int padding) 
+  public HUD(Game game, int width, int height, int padding) 
   {
     this.width = width;
     this.height = height;
     this.padding = padding;
+    this.game = game;
+
     setPreferredSize(new Dimension(width + 2 * padding + 1, height + 2 * padding + 1));
   }
 
@@ -67,6 +76,16 @@ public class HUD extends JLabel
     // Tile
     for (Block block: tile.toBlockArray(0, TILE_POS))
       block.render(g);
+
+    // Score
+    String score = String.valueOf(game.getScore());
+    String highscore = String.valueOf(game.getHighscore());
+    g.setColor(Color.RED);
+    g.setFont(SCORE_FONT);
+    g.drawString("SCORE:", padding, 200);
+    g.drawString(score, padding, 225);
+    g.drawString("HIGHSCORE:", padding, 270);
+    g.drawString(highscore, padding, 295);
   }
 
   public void setTile(Tile tile)

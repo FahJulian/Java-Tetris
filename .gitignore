@@ -3,3 +3,6 @@
 .bin/
 *.sh
 *.run
+*.sqlite
+*.sqlite3
+*.db

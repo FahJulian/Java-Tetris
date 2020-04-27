@@ -2,6 +2,7 @@ package com.github.fahjulian.tetris;
 
 import com.github.fahjulian.tetris.ui.Window;
 import com.github.fahjulian.tetris.util.Direction;
+import com.github.fahjulian.tetris.util.Database;
 
 import java.awt.event.KeyListener;
 import java.awt.event.KeyEvent;
@@ -24,6 +25,9 @@ public class Game implements Runnable
   private Window window;
   private Grid grid;
   private HUD hud;
+  private int highscore;
+  private int score;
+  private int totalClearedRows;
 
   static 
   {
@@ -34,7 +38,7 @@ public class Game implements Runnable
     GRID_WIDTH = Grid.BLOCKSIZE * Grid.COLS;
     GRID_HEIGHT = Grid.BLOCKSIZE * Grid.ROWS;
     HUD_WIDTH = Grid.BLOCKSIZE * 4;
-    HUD_HEIGHT = Grid.BLOCKSIZE * 4;
+    HUD_HEIGHT = Grid.BLOCKSIZE * 4 + 0;
     CONTENT_WIDTH = GRID_WIDTH + HUD_WIDTH + 3 * PADDING + 2;
     CONTENT_HEIGHT = GRID_HEIGHT + 2 * PADDING + 1;
   }
@@ -62,11 +66,53 @@ public class Game implements Runnable
     running = false;
   }
 
+  /**
+   * Update the score for the amount of cleared rows using the official tetris score system.
+   * @param cleared_rows The amount of rows that have been cleared at one time
+   */
+  public void updateScore(int clearedRows)
+  {
+    int points = 0;
+    switch (clearedRows)
+    {
+      case 1: points = 40; break;
+      case 2: points = 100; break;
+      case 3: points = 300; break;
+      case 4: points = 1200; break;
+      default: return;
+    }
+
+    points *= totalClearedRows / 10 + 1;
+    totalClearedRows += clearedRows;
+    score += points;
+
+    if (score > highscore) 
+    {
+      highscore = score;
+      Database.saveHighscore(highscore);
+    }
+  }
+
+  public int getScore()
+  { 
+    return score;
+  }
+
+  public int getHighscore()
+  {
+    return highscore;
+  }
+
   private void init() 
   {
+    Database.init();
+    score = 0;
+    highscore = Database.getHighscore();
+    totalClearedRows = 0;
+
     window = new Window(WINDOW_TITLE, CONTENT_WIDTH, CONTENT_HEIGHT);
     grid = new Grid(this, GRID_WIDTH, GRID_HEIGHT, PADDING);
-    hud = new HUD(HUD_WIDTH, HUD_HEIGHT, PADDING);
+    hud = new HUD(this, HUD_WIDTH, HUD_HEIGHT, PADDING);
 
     window.add(grid, BorderLayout.CENTER);
     window.add(hud, BorderLayout.EAST);
@@ -105,6 +151,8 @@ public class Game implements Runnable
       @Deprecated @Override 
       public void keyTyped(KeyEvent e) {}
     });
+
+    window.setVisible(true);
   }
 
   private void start() 
