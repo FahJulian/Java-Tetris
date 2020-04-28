@@ -16,7 +16,7 @@ public class Database
     {
       Class.forName("org.sqlite.JDBC");
       // Class.forName("org.xerial.sqlite-jdbc");
-      c = DriverManager.getConnection("jdbc:sqlite:./db.sqlite");
+      c = DriverManager.getConnection("jdbc:sqlite:./.tetris.sqlite");
       c.setAutoCommit(false);
       stmt = c.createStatement();
 
@@ -54,7 +54,7 @@ public class Database
     try
     {
         Class.forName("org.sqlite.JDBC");
-        c = DriverManager.getConnection("jdbc:sqlite:./db.sqlite");
+        c = DriverManager.getConnection("jdbc:sqlite:./.tetris.sqlite");
         c.setAutoCommit(false);
         stmt = c.createStatement();
 
@@ -80,7 +80,7 @@ public class Database
     try
     {
       Class.forName("org.sqlite.JDBC");
-      c = DriverManager.getConnection("jdbc:sqlite:./db.sqlite");
+      c = DriverManager.getConnection("jdbc:sqlite:./.tetris.sqlite");
       c.setAutoCommit(false);
       stmt = c.createStatement();
 

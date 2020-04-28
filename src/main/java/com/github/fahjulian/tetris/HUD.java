@@ -33,7 +33,7 @@ public class HUD extends JLabel
     ROWS = 4;
     COLS = 4;
     TILE_POS = new Point(Game.PADDING, Game.PADDING);
-    SCORE_FONT = FontLoader.loadTTF("./rsc/fonts/PlaymegamesReguler-2OOee.ttf", Font.PLAIN, 25);
+    SCORE_FONT = FontLoader.loadTTF("src/main/resources/fonts/PlaymegamesReguler-2OOee.ttf", Font.PLAIN, 25);
   }
 
   /**

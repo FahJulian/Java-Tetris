@@ -46,7 +46,7 @@ public class Game implements Runnable
     CONTENT_HEIGHT = GRID_HEIGHT + 2 * PADDING + 1;
   }
 
-  private Game() 
+  public Game() 
   {
     new Thread(this).start();
   }
