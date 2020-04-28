@@ -11,6 +11,7 @@ public class FontLoader {
   { 
     try 
     {
+      System.out.println(new File(ttfPath).getAbsolutePath());
       return Font.createFonts(new File(ttfPath))[0].deriveFont(style, fontSize);
     } 
     catch(IOException | FontFormatException e)
